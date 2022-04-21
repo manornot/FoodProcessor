@@ -15,7 +15,8 @@ currentFoodData = {
     'Weight': ''
 }
 
-con = sqlite3.connect('/home/pi/FoodProcessor/ProtFatCarbKCal.db', check_same_thread=False)
+con = sqlite3.connect('/home/pi/FoodProcessor/ProtFatCarbKCal.db',
+                      check_same_thread=False)
 cur = con.cursor()
 
 bot = telebot.TeleBot(config.token)
@@ -91,7 +92,17 @@ def checkFoodData():
     return notEnoughData
 
 
-@bot.message_handler(commands = ['status', 'info'])
+@bot.message_handler(commands=['info'])
+def info_responce(message):
+    bot.send_message(message.chat.id, '/info')
+    bot.send_message(message.chat.id, '/status')
+    bot.send_message(message.chat.id, '/add')
+    bot.send_message(message.chat.id, '/process')
+    bot.send_message(message.chat.id, '/food_list')
+    bot.send_message(message.chat.id, '/calc_PFC')
+
+
+@bot.message_handler(commands=['status'])
 def status_responce(message):
     DayFoodData = {'Prot': 0, 'Fat': 0, 'Carb': 0, 'KCal': 0}
     #print(get_today_stats())
@@ -105,15 +116,38 @@ def status_responce(message):
         if row[6]:
             DayFoodData['KCal'] += row[6]
     for key in DayFoodData:
-        try:    
+        try:
             DayFoodData[key] = round(DayFoodData[key])
         except:
             pass
-    bot.send_message(message.chat.id, f'Норма:\nProt:140, Fat:70, Carb:210, KCal:{140*4 + 70*8 + 210*4}')
+    bot.send_message(
+        message.chat.id,
+        f'Норма:\nProt:140, Fat:70, Carb:210, KCal:{140*4 + 70*9 + 210*4}')
     bot.send_message(message.chat.id, f'Сегодня нажрал:\n{DayFoodData}')
     bot.send_message(
-        message.chat.id, 
-        f"Осталось:\nProt:{140-DayFoodData.get('Prot')}, Fat:{70-DayFoodData.get('Fat')}, Carb:{210-DayFoodData.get('Carb')}, KCal:{140*4 + 70*8 + 210*4 -DayFoodData.get('KCal')}")
+        message.chat.id,
+        f"Осталось:\nProt:{140-DayFoodData.get('Prot')}, Fat:{70-DayFoodData.get('Fat')}, Carb:{210-DayFoodData.get('Carb')}, KCal:{140*4 + 70*9 + 210*4 -DayFoodData.get('KCal')}"
+    )
+
+
+@bot.message_handler(commands=['add'])
+def add_responce(message):
+    pass
+
+
+@bot.message_handler(commands=['process'])
+def process_responce(message):
+    pass
+
+
+@bot.message_handler(commands=['food_list'])
+def food_list_responce(message):
+    pass
+
+
+@bot.message_handler(commands=['calc_PFC'])
+def calc_PFC_responce(message):
+    pass
 
 
 @bot.message_handler(content_types=["text"])
@@ -127,7 +161,8 @@ def repeat_all_messages(message):  # Название функции не игр
     try:
         data = parse_msg(data)
     except:
-        bot.send_message(message.chat.id, 'ERROR!\nExpected format X:nnn Y:mmm Z:kkk')
+        bot.send_message(message.chat.id,
+                         'ERROR!\nExpected format X:nnn Y:mmm Z:kkk')
         return
 
     # match len(data.split(',')):
@@ -181,7 +216,7 @@ def repeat_all_messages(message):  # Название функции не игр
         #    if row[6]:
         #        DayFoodData['KCal'] += row[6]
         #for key in DayFoodData:
-        #    try:    
+        #    try:
         #        DayFoodData[key] = round(DayFoodData[key])
         #    except:
         #        pass
