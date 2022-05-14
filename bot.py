@@ -5,6 +5,7 @@ import json
 from datetime import date
 from datetime import datetime
 from telebot import types
+from calcPFC import Bujda
 
 currentFoodData = {
     'Name': '',
@@ -14,7 +15,7 @@ currentFoodData = {
     'KCal': '',
     'Weight': ''
 }
-
+bujda = Bujda()
 con = sqlite3.connect('/home/pi/FoodProcessor/ProtFatCarbKCal.db',
                       check_same_thread=False)
 cur = con.cursor()
@@ -98,8 +99,9 @@ def info_responce(message):
     bot.send_message(message.chat.id, '/status')
     bot.send_message(message.chat.id, '/add')
     bot.send_message(message.chat.id, '/process')
+    bot.send_message(message.chat.id, '/clear')
     bot.send_message(message.chat.id, '/food_list')
-    bot.send_message(message.chat.id, '/calc_PFC')
+    #bot.send_message(message.chat.id, '/calc_PFC')
 
 
 @bot.message_handler(commands=['status'])
@@ -132,7 +134,13 @@ def status_responce(message):
 
 @bot.message_handler(commands=['add'])
 def add_responce(message):
-    pass
+    try:
+        component = parse_msg(message)
+        data = {k: component.get(k) for k in ['Prot', 'Fat', 'Carb', 'Weight']}
+        bujda.addComponent(data)
+        bot.send_message(message.chat.id, 'K, chum!')
+    except:
+        bot.send_message(message.chat.id, 'WTF, Nigga!')
 
 
 @bot.message_handler(commands=['process'])
@@ -196,7 +204,13 @@ def repeat_all_messages(message):  # Название функции не игр
 
     storeData(data)
     emptyData = checkFoodData()
-    if emptyData and emptyData != ['Name']:
+    if ['KCal'] in emptyData:
+        currentFoodData[
+            'KCal'] = currentFoodData['Prot'] * 4 + currentFoodData[
+                'Fat'] * 9 + currentFoodData['Carb'] * 4
+        emptyData = checkFoodData()
+
+    if emptyData and (emptyData != ['Name']):
         #print(emptyData)
         for empty in emptyData:
             bot.send_message(message.chat.id, 'Please enter ' + empty)
