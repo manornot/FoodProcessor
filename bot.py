@@ -144,6 +144,9 @@ def add_responce(message):
     try:
         component = parse_msg(message.text.replace('/add ',''))
         data = {k: component.get(k,0) for k in ['Prot', 'Fat', 'Carb', 'Weight']}
+        if data['Weight'] == 0:
+            bot.send_message(message.chat.id, 'Some thin air!')
+            return    
         bujda.addComponent(data)
         bot.send_message(message.chat.id, 'K, chum!')
     except:
