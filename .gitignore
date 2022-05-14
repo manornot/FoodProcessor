@@ -1,4 +1,5 @@
 config.py
 ProtFatCarbKCal.db
+menu.db
 supervisord.conf
 __pycache__
