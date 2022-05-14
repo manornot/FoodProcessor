@@ -134,12 +134,16 @@ def status_responce(message):
         f"Осталось:\nProt:{140-DayFoodData.get('Prot')}, Fat:{70-DayFoodData.get('Fat')}, Carb:{210-DayFoodData.get('Carb')}, KCal:{140*4 + 70*9 + 210*4 -DayFoodData.get('KCal')}"
     )
 
+@bot.message_handler(commands=['clear'])
+def clear_responce(message):
+    bujda.clear()
+    bot.send_message(message.chat.id, 'Sector clear!')
 
 @bot.message_handler(commands=['add'])
 def add_responce(message):
     try:
         component = parse_msg(message.text.replace('/add ',''))
-        data = {k: component.get(k) for k in ['Prot', 'Fat', 'Carb', 'Weight']}
+        data = {k: component.get(k,0) for k in ['Prot', 'Fat', 'Carb', 'Weight']}
         bujda.addComponent(data)
         bot.send_message(message.chat.id, 'K, chum!')
     except:
@@ -150,6 +154,7 @@ def add_responce(message):
 def process_responce(message):
     calc = bujda.calculate(int(message.text.replace('/process ','')))
     bot.send_message(message.chat.id,calc)
+    bujda.clear()
 
 
 @bot.message_handler(commands=['food_list'])
