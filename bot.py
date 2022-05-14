@@ -19,6 +19,9 @@ bujda = Bujda()
 con = sqlite3.connect('/home/pi/FoodProcessor/ProtFatCarbKCal.db',
                       check_same_thread=False)
 cur = con.cursor()
+conMenu = sqlite3.connect('/home/pi/FoodProcessor/menu.db',
+                      check_same_thread=False)
+curMenu = conMenu.cursor()
 
 bot = telebot.TeleBot(config.token)
 
@@ -135,7 +138,7 @@ def status_responce(message):
 @bot.message_handler(commands=['add'])
 def add_responce(message):
     try:
-        component = parse_msg(message)
+        component = parse_msg(message.text)
         data = {k: component.get(k) for k in ['Prot', 'Fat', 'Carb', 'Weight']}
         bujda.addComponent(data)
         bot.send_message(message.chat.id, 'K, chum!')
@@ -145,7 +148,7 @@ def add_responce(message):
 
 @bot.message_handler(commands=['process'])
 def process_responce(message):
-    pass
+    bot.send_message(message.chat.id,bujda.calculate(message.text))
 
 
 @bot.message_handler(commands=['food_list'])

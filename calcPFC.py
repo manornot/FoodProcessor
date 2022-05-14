@@ -5,6 +5,7 @@ def dict2text(data):
     return f"Б:{data.get('Prot')} Ж:{data.get('Fat')} У:{data.get('Carb')} К:{data.get('KCal')}"
 
 
+
 class Bujda:
     components: list = []
 
