@@ -138,7 +138,7 @@ def status_responce(message):
 @bot.message_handler(commands=['add'])
 def add_responce(message):
     try:
-        component = parse_msg(message.text)
+        component = parse_msg(message.text.replace('/add ',''))
         data = {k: component.get(k) for k in ['Prot', 'Fat', 'Carb', 'Weight']}
         bujda.addComponent(data)
         bot.send_message(message.chat.id, 'K, chum!')
@@ -148,7 +148,8 @@ def add_responce(message):
 
 @bot.message_handler(commands=['process'])
 def process_responce(message):
-    bot.send_message(message.chat.id,bujda.calculate(message.text))
+    calc = bujda.calculate(int(message.text.replace('/process ','')))
+    bot.send_message(message.chat.id,calc)
 
 
 @bot.message_handler(commands=['food_list'])
