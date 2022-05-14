@@ -25,13 +25,14 @@ class Bujda:
         totKCal = totProt * 4 + totFat * 9 + totCarb * 4
         if not finalWeight:
             finalWeight = sum([comp['Weight'] for comp in self.components])
+        self.clear()
         return dict2text({
             'Prot': totProt / finalWeight * 100,
             'Fat': totFat / finalWeight * 100,
             'Carb': totCarb / finalWeight * 100,
             'KCal': totKCal / finalWeight * 100
         })
-        self.clear()
+        
         
     def clear(self):
         self.components = []
