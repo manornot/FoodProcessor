@@ -15,8 +15,8 @@ currentFoodData = {
     'KCal': '',
     'Weight': ''
 }
-targets = [' ','Prot','Fat','Carb','Kcal','Weight','К','Б','Ж','У','В','P','F','C','K','W',':']
-mew_texts = [',','"Prot"','"Fat"','"Carb"','"Kcal"','"Weight"','"Prot"','"Fat"','"Carb"','"Kcal"','"Weight"','"Prot"','"Fat"','"Carb"','"Kcal"','"Weight"'," : "]
+targets = [' ','prot','fat','carb','kcal','weight','к','б','ж','у','в',':']
+new_texts = [',','"Prot"','"Fat"','"Carb"','"KCal"','"Weight"','"Prot"','"Fat"','"Carb"','"KCal"','"Weight"'," : "]
 bujda = Bujda()
 con = sqlite3.connect('/home/manornot/FoodProcessor/ProtFatCarbKCal.db',
                       check_same_thread=False)
@@ -29,7 +29,7 @@ bot = telebot.TeleBot(config.token)
 
 
 def get_today_stats():
-    print(f"SELECT * FROM PFCKC date = '{str(date.today())}'")
+    #print(f"SELECT * FROM PFCKC date = '{str(date.today())}'")
     dt = cur.execute(
         f"SELECT * FROM PFCKC WHERE date = ?",
         (str(date.today()), ),
@@ -39,24 +39,30 @@ def get_today_stats():
 
 
 def parse_msg(msg):
+    msg = msg.lower()
     msg = '{"Name":"",' + msg + '}'
-    [msg=msg.replace(trgt,new_txt) for trgt,new_txt in zip(targets,new_texts)]
-    msg = msg.replace(' ', ',')
-    msg = msg.replace('Б', '"Prot"')
-    msg = msg.replace('Ж', '"Fat"')
-    msg = msg.replace('У', '"Carb"')
-    msg = msg.replace('К', '"KCal"')
-    msg = msg.replace('В', '"Weight"')
-    msg = msg.replace(':', " : ")
+    [msg:=msg.replace(trgt,new_txt) for trgt,new_txt in zip(targets,new_texts)]
+    #msg = msg.replace(' ', ',')
+    #msg = msg.replace('Б', '"Prot"')
+    #msg = msg.replace('Ж', '"Fat"')
+    #msg = msg.replace('У', '"Carb"')
+    #msg = msg.replace('К', '"KCal"')
+    #msg = msg.replace('В', '"Weight"')
+    #msg = msg.replace(':', " : ")
+
     msg = json.loads(msg)
+    ##print(msg)
     return msg
 
 
 def storeData(data: dict):
+    #print(f'store data - {data}')
     for key in data.keys():
         temp = data.get(key)
+
         if temp != '':
             currentFoodData[key] = temp
+            #print(key,currentFoodData[key])
 
 
 def saveData(data):
@@ -92,9 +98,12 @@ def calcData(data: dict):
 def checkFoodData():
     notEnoughData = []
     for key in currentFoodData.keys():
+        #print(currentFoodData)
         temp = currentFoodData.get(key)
+
         if temp == '':
             notEnoughData.append(key)
+
 
     return notEnoughData
 
@@ -113,7 +122,7 @@ def info_responce(message):
 @bot.message_handler(commands=['status'])
 def status_responce(message):
     DayFoodData = {'Prot': 0, 'Fat': 0, 'Carb': 0, 'KCal': 0}
-    #print(get_today_stats())
+    ##print(get_today_stats())
     for row in get_today_stats():
         if row[3]:
             DayFoodData['Prot'] += row[3]
@@ -183,40 +192,13 @@ def repeat_all_messages(message):  # Название функции не игр
     #data = data.split(',')
     try:
         data = parse_msg(data)
+        #print(data)
     except:
         bot.send_message(message.chat.id,
                          'ERROR!\nExpected format X:nnn Y:mmm Z:kkk')
         return
 
-    # match len(data.split(',')):
-    #     case 6:
-    #         # Апельсин,Б:123,Ж:123,У:123,К:123,В:123
-    #         if ['Б:','Ж:','У:','К:','В:'] in data:
-    #             data = parse_msg(data)
-    #             data = calcData(data)
-    #
-    #             pass
-    #         else:
-    #             print('wtf')
-    #     case 5:
-    #         # Апельсин,Б:123,Ж:123,У:123,В:123 # Апельсин,Б:123,Ж:123,У:123,К:123 # Б:123,Ж:123,У:123,К:123,В:123
-    #         if ['Б:','Ж:','У:','К:'] in data:
-    #             data = parse_msg(data)
-    #             pass
-    #         else:
-    #             print('wtf')
-    #         print('good')
-    #     case 4:
-    #         # Апельсин,Б:123,Ж:123,У:123 # Б:123,Ж:123,У:123,В:123 # Б:123,Ж:123,У:123,К:123
-    #         data = parse_msg(data)
-    #         storeData(data)
-    #     case 3:
-    #         # Б:123,Ж:123,У:123
-    #         data = parse_msg(data)
-    #     case 1:
-    #         # Апельсин # 123 # Б:123 # Ж:123 # У:123 # К:123 # В:123
-    #         data = parse_msg(data)
-
+    #print(data)
     storeData(data)
     emptyData = checkFoodData()
     if ['KCal'] in emptyData:
@@ -226,7 +208,7 @@ def repeat_all_messages(message):  # Название функции не игр
         emptyData = checkFoodData()
 
     if emptyData and (emptyData != ['Name']):
-        #print(emptyData)
+        ##print(emptyData)
         for empty in emptyData:
             bot.send_message(message.chat.id, 'Please enter ' + empty)
     else:
@@ -234,7 +216,7 @@ def repeat_all_messages(message):  # Название функции не игр
         saveData(FoodData)
         status_responce(message)
         #DayFoodData = {'Prot': 0, 'Fat': 0, 'Carb': 0, 'KCal': 0}
-        ##print(get_today_stats())
+        ###print(get_today_stats())
         #for row in get_today_stats():
         #    if row[3]:
         #        DayFoodData['Prot'] += row[3]
