@@ -15,6 +15,8 @@ currentFoodData = {
     'KCal': '',
     'Weight': ''
 }
+targets = [' ','Prot','Fat','Carb','Kcal','Weight','К','Б','Ж','У','В','P','F','C','K','W',':']
+mew_texts = [',','"Prot"','"Fat"','"Carb"','"Kcal"','"Weight"','"Prot"','"Fat"','"Carb"','"Kcal"','"Weight"','"Prot"','"Fat"','"Carb"','"Kcal"','"Weight"'," : "]
 bujda = Bujda()
 con = sqlite3.connect('/home/manornot/FoodProcessor/ProtFatCarbKCal.db',
                       check_same_thread=False)
@@ -38,6 +40,7 @@ def get_today_stats():
 
 def parse_msg(msg):
     msg = '{"Name":"",' + msg + '}'
+    [msg=msg.replace(trgt,new_txt) for trgt,new_txt in zip(targets,new_texts)]
     msg = msg.replace(' ', ',')
     msg = msg.replace('Б', '"Prot"')
     msg = msg.replace('Ж', '"Fat"')
