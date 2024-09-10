@@ -7,6 +7,18 @@ from datetime import datetime
 from telebot import types
 from calcPFC import Bujda
 
+cur_weight = 100
+fat_percent = 25
+lean_mass = cur_weight*(1-fat_percent/100)
+norm = {
+    'Prot':lean_mass*2.2,
+    'Fat':lean_mass*0.75,
+    'Carbs':lean_mass*3,
+    'KCal':0,
+    
+}
+norm['KCal'] = norm['Carbs'] * 4 + norm['Fat'] * 9 + norm['Prot']*4
+
 currentFoodData = {
     'Name': '',
     'Prot': '',
@@ -15,13 +27,13 @@ currentFoodData = {
     'KCal': '',
     'Weight': ''
 }
-targets = [' ','prot','fat','carb','kcal','weight','к','б','ж','у','в',':']
+targets = [' ','prot','fat','carb','kcal','weight','б','ж','у','к','в',':']
 new_texts = [',','"Prot"','"Fat"','"Carb"','"KCal"','"Weight"','"Prot"','"Fat"','"Carb"','"KCal"','"Weight"'," : "]
 bujda = Bujda()
-con = sqlite3.connect('/home/manornot/FoodProcessor/ProtFatCarbKCal.db',
+con = sqlite3.connect('/var/services/homes/manornot/bots/FoodProcessor/ProtFatCarbKCal.db',
                       check_same_thread=False)
 cur = con.cursor()
-conMenu = sqlite3.connect('/home/manornot/FoodProcessor/menu.db',
+conMenu = sqlite3.connect('/var/services/homes/manornot/bots/FoodProcessor/menu.db',
                       check_same_thread=False)
 curMenu = conMenu.cursor()
 
@@ -139,11 +151,11 @@ def status_responce(message):
             pass
     bot.send_message(
         message.chat.id,
-        f'Норма:\nProt:140, Fat:70, Carb:210, KCal:{140*4 + 70*9 + 210*4}')
+        f'Норма:\nProt:{norm["Prot"]}, Fat:{norm["Fat"]}, Carb:{norm["Carbs"]}, KCal:{norm["KCal"]}')
     bot.send_message(message.chat.id, f'Сегодня нажрал:\n{DayFoodData}')
     bot.send_message(
         message.chat.id,
-        f"Осталось:\nProt:{140-DayFoodData.get('Prot')}, Fat:{70-DayFoodData.get('Fat')}, Carb:{210-DayFoodData.get('Carb')}, KCal:{140*4 + 70*9 + 210*4 -DayFoodData.get('KCal')}"
+        f"Осталось:\nProt:{norm['Prot']-DayFoodData.get('Prot')}, Fat:{norm['Fat']-DayFoodData.get('Fat')}, Carb:{norm['Carbs']-DayFoodData.get('Carb')}, KCal:{norm['KCal'] -DayFoodData.get('KCal')}"
     )
 
 @bot.message_handler(commands=['clear'])
